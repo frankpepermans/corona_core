@@ -5,7 +5,7 @@ homepage: http://www.igindo.com
 author: Frank <frank@igindo.com>
 
 environment:
-  sdk: '>=2.0.0-dev.62.0 <3.0.0'
+  sdk: '>=2.1.0 <3.0.0'
 
 dependencies:
-  quiver: ^0.29.0
+  quiver: ^2.0.0
