@@ -1,11 +1,12 @@
 name: corona_core
 description: A lens implementation, strongly typed, with a build step.
-version: 0.2.0
+version: 0.3.0-nullsafety.0
 homepage: http://www.igindo.com
 author: Frank <frank@igindo.com>
 
 environment:
-  sdk: '>=2.1.0 <3.0.0'
+  sdk: '>=2.12.0-51.0.dev <3.0.0'
 
 dependencies:
+  pedantic: ^1.10.0-nullsafety.3
   quiver: ^2.0.0

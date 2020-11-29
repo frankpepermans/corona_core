@@ -15,27 +15,36 @@ void write(List<int> data, Uint8List encoded) {
   data.addAll(encoded);
 }
 
-Uint8List writeBool(bool value) => new Uint8List.fromList(
-    value == null ? const <int>[0] : value ? const <int>[1] : const <int>[2]);
+Uint8List writeBool(bool? value) => Uint8List.fromList(value == null
+    ? const <int>[0]
+    : value
+        ? const <int>[1]
+        : const <int>[2]);
 
-bool readBool(Uint8List encoded) {
-  final int value = encoded[0];
+bool? readBool(Uint8List encoded) {
+  final value = encoded[0];
 
-  if (value == 0)
+  if (value == 0) {
     return null;
-  else if (value == 1)
+  } else if (value == 1) {
     return true;
-  else if (value == 2) return false;
+  } else if (value == 2) return false;
 
-  throw new Exception('Cannot decode $encoded to a boolean value');
+  throw Exception('Cannot decode $encoded to a boolean value');
 }
 
-Uint8List writeInt(int value) {
-  if (value == null) return new Uint8List.fromList(const <int>[0]);
+Uint8List writeInt(int? value) {
+  if (value == null) return Uint8List.fromList(const <int>[0]);
 
-  final bool isZero = value == 0;
-  final bool isPositive = value >= 0;
-  final List<int> encoded = <int>[isZero ? 1 : isPositive ? 2 : 3];
+  final isZero = value == 0;
+  final isPositive = value >= 0;
+  final encoded = <int>[
+    isZero
+        ? 1
+        : isPositive
+            ? 2
+            : 3
+  ];
 
   if (!isZero) {
     value = value < 0 ? -value : value;
@@ -43,93 +52,95 @@ Uint8List writeInt(int value) {
     _writeIntImpl(value, encoded);
   }
 
-  return new Uint8List.fromList(encoded);
+  return Uint8List.fromList(encoded);
 }
 
 Uint8List writeUint(int value) {
-  if (value == 0) return new Uint8List.fromList(const <int>[0]);
+  if (value == 0) return Uint8List.fromList(const <int>[0]);
 
-  final List<int> encoded = <int>[];
+  final encoded = <int>[];
 
   _writeIntImpl(value, encoded);
 
-  return new Uint8List.fromList(encoded);
+  return Uint8List.fromList(encoded);
 }
 
-int readInt(Uint8List encoded) {
-  final int sign = encoded.first;
+int? readInt(Uint8List encoded) {
+  final sign = encoded.first;
 
   if (sign == 0) return null;
 
-  final bool isZero = sign == 1;
-  int value = 0;
+  final isZero = sign == 1;
+  var value = 0;
 
   if (isZero) return value;
 
-  final bool isPositive = sign == 2;
+  final isPositive = sign == 2;
 
-  for (int i = 1, offset = 0, len = encoded.length; i < len; i++, offset += 8)
+  for (var i = 1, offset = 0, len = encoded.length; i < len; i++, offset += 8) {
     value |= encoded[i] << offset;
+  }
 
   return isPositive ? value : -value;
 }
 
 int readUint(Uint8List encoded) {
-  int value = 0;
+  var value = 0;
 
-  for (int i = 0, offset = 0, len = encoded.length; i < len; i++, offset += 8)
+  for (var i = 0, offset = 0, len = encoded.length; i < len; i++, offset += 8) {
     value |= encoded[i] << offset;
+  }
 
   return value;
 }
 
-Uint8List writeDouble(double value) {
-  if (value == null) return new Uint8List.fromList(const <int>[0]);
+Uint8List writeDouble(double? value) {
+  if (value == null) return Uint8List.fromList(const <int>[0]);
 
-  final List<int> result = <int>[1];
-  int fp = 0;
+  final result = <int>[1];
+  var fp = 0;
 
-  while (value.remainder(1.0) != .0) {
+  while (value!.remainder(1.0) != .0) {
     value *= 10;
 
     fp++;
   }
 
-  final Uint8List encoded = writeUint(value.toInt());
+  final encoded = writeUint(value.toInt());
 
   result.add(value.sign == -1.0 ? 0 : 1);
   result.add(fp);
   result.add(encoded.length);
   result.addAll(encoded);
 
-  return new Uint8List.fromList(result);
+  return Uint8List.fromList(result);
 }
 
-double readDouble(Uint8List encoded) {
+double? readDouble(Uint8List encoded) {
   if (encoded[0] == 0) return null;
 
-  final bool isPositive = encoded[1] == 1;
-  final int fp = encoded[2];
-  final int len = encoded[3];
-  double value = readUint(encoded.sublist(4, len + 4)) / (fp * 10);
+  final isPositive = encoded[1] == 1;
+  final fp = encoded[2];
+  final len = encoded[3];
+  var value = readUint(encoded.sublist(4, len + 4)) / (fp * 10);
 
   return isPositive ? value : -value;
 }
 
-Uint8List writeDateTime(DateTime value) {
-  if (value == null) return new Uint8List.fromList(const <int>[0]);
+Uint8List writeDateTime(DateTime? value) {
+  if (value == null) return Uint8List.fromList(const <int>[0]);
 
-  final List<int> result = <int>[1];
+  final result = <int>[1];
 
   result.addAll(writeUint(value.millisecondsSinceEpoch));
 
-  return new Uint8List.fromList(result);
+  return Uint8List.fromList(result);
 }
 
-DateTime readDateTime(Uint8List encoded) {
+DateTime? readDateTime(Uint8List encoded) {
   if (encoded[0] == 0) return null;
-  
-  return new DateTime.fromMillisecondsSinceEpoch(readUint(encoded.sublist(1)));
+
+  return DateTime.fromMillisecondsSinceEpoch(readUint(encoded.sublist(1)));
 }
 
 void _writeIntImpl(int value, List<int> encoded) {
@@ -142,24 +153,24 @@ void _writeIntImpl(int value, List<int> encoded) {
   }
 }
 
-Uint8List writeString(String value) {
-  if (value == null) return new Uint8List.fromList(const <int>[0]);
+Uint8List writeString(String? value) {
+  if (value == null) return Uint8List.fromList(const <int>[0]);
 
-  final List<int> result = <int>[1];
+  final result = <int>[1];
 
   value.codeUnits.map(writeUint).forEach((Uint8List encoded) {
     result.add(encoded.length);
     result.addAll(encoded);
   });
 
-  return new Uint8List.fromList(result);
+  return Uint8List.fromList(result);
 }
 
-String readString(Uint8List encoded) {
+String? readString(Uint8List encoded) {
   if (encoded[0] == 0) return null;
 
-  final List<int> charCodes = <int>[];
-  final int len = encoded.length;
+  final charCodes = <int>[];
+  final len = encoded.length;
   int i = 1, size;
 
   while (i < len) {
@@ -170,15 +181,16 @@ String readString(Uint8List encoded) {
     i += size + 1;
   }
 
-  return new String.fromCharCodes(charCodes);
+  return String.fromCharCodes(charCodes);
 }
 
-Uint8List writeIterable<T>(Iterable<T> value, Uint8List encoder(T value)) {
-  if (value == null) return new Uint8List.fromList(const <int>[0]);
+Uint8List writeIterable<T>(
+    Iterable<T>? value, Uint8List Function(T value) encoder) {
+  if (value == null) return Uint8List.fromList(const <int>[0]);
 
-  final List<int> encoded = <int>[1];
-  final int len = value.length;
-  final Uint8List size = writeUint(len);
+  final encoded = <int>[1];
+  final len = value.length;
+  final size = writeUint(len);
 
   encoded.add(size.length);
   encoded.addAll(size);
@@ -188,24 +200,23 @@ Uint8List writeIterable<T>(Iterable<T> value, Uint8List encoder(T value)) {
     encoded.addAll(element);
   });
 
-  return new Uint8List.fromList(encoded);
+  return Uint8List.fromList(encoded);
 }
 
-List<T> readIterable<T>(Uint8List encoded, T decoder(Uint8List value)) {
+List<T>? readIterable<T>(
+    Uint8List encoded, T Function(Uint8List value) decoder) {
   if (encoded[0] == 0) return null;
 
-  final int size = readUint(new Uint8List.fromList(<int>[encoded[1]]));
-  final int len = readUint(encoded.sublist(2, 2 + size));
-  final List<T> result = new List<T>(len);
-  int index = 2 + size;
+  final size = readUint(Uint8List.fromList(<int>[encoded[1]]));
+  final len = readUint(encoded.sublist(2, 2 + size));
+  var index = 2 + size;
 
-  for (int i = 0; i < len; i++) {
-    int fragmentLen = readUint(new Uint8List.fromList(<int>[encoded[index]]));
-
-    result[i] = decoder(encoded.sublist(index + 1, index + fragmentLen + 1));
+  return List<T>.generate(len, (i) {
+    final fragmentLen = readUint(Uint8List.fromList(<int>[encoded[index]]));
+    final result = decoder(encoded.sublist(index + 1, index + fragmentLen + 1));
 
     index += fragmentLen + 1;
-  }
 
-  return new List<T>.unmodifiable(result);
+    return result;
+  }, growable: false);
 }
